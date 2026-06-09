@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Banco de Dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: springboot_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: meubanco
+      MYSQL_USER: usuario
+      MYSQL_PASSWORD: senha
+      MYSQL_ROOT_PASSWORD: senharoot
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Garante que o contêiner avise quando o MySQL estiver realmente pronto
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # API Spring Boot
+  api:
+    build: .
+    container_name: springboot_api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/meubanco?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=usuario
+      - SPRING_DATASOURCE_PASSWORD=senha
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
