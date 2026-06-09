@@ -16,7 +16,7 @@ Você só precisa ter instalado em sua máquina:
 
 **1. Clone o repositório:**
    ```bash
-   git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
+   git clone [https://github.com/Otavio-Ferreira/Sistema-Site-CMS.git](https://github.com/Otavio-Ferreira/Sistema-Site-CMS.git)
    ```
    
    ```bash
