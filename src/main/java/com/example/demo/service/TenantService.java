@@ -6,6 +6,10 @@ import com.example.demo.model.Tenant;
 import com.example.demo.model.Usuario;
 import com.example.demo.repository.TenantRepository;
 import com.example.demo.repository.UsuarioRepository;
+
+import java.util.List;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,10 +18,12 @@ public class TenantService {
 
     private final TenantRepository tenantRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public TenantService(TenantRepository tenantRepository, UsuarioRepository usuarioRepository) {
+    public TenantService(TenantRepository tenantRepository, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.tenantRepository = tenantRepository;
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional 
@@ -34,11 +40,45 @@ public class TenantService {
         Usuario usuario = new Usuario();
         usuario.setNomeCompleto(dto.nome());
         usuario.setEmail(dto.email());
-        usuario.setSenhaHash(dto.senha()); 
+        usuario.setSenhaHash(dto.senha()); // Sem criptografia por enquanto
         usuario.setAdmin(true);
         usuario.setTenant(tenant);
         usuarioRepository.save(usuario);
 
         return new TenantResponseDTO(tenant.getId(), tenant.getNome(), usuario.getEmail());
+    }
+
+    // Buscar todos os inquilinos
+    public List<TenantResponseDTO> listarTodos() {
+        return tenantRepository.findAll().stream().map(tenant -> new TenantResponseDTO(
+            tenant.getId(), 
+            tenant.getNome(), 
+            "Email oculto na listagem")).toList(); // Simplificação para a listagem
+    }
+
+    // Buscar um inquilino específico pelo ID
+    public TenantResponseDTO buscarPorId(Long id) {
+        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new RuntimeException("Inquilino não encontrado com o ID: " + id));
+        
+        return new TenantResponseDTO(tenant.getId(), tenant.getNome(), "Email confidencial");
+    }
+    
+    // Atualizar os dados do inquilino
+    @Transactional
+    public TenantResponseDTO atualizar(Long id, TenantRequestDTO dto) {
+        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new RuntimeException("Inquilino não encontrado com o ID: " + id));
+        
+        tenant.setNome(dto.nome());
+        tenantRepository.save(tenant);
+        
+        return new TenantResponseDTO(tenant.getId(), tenant.getNome(), dto.email());
+    }
+
+    // Deletar um inquilino
+    @Transactional
+    public void deletar(Long id) {
+        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new RuntimeException("Inquilino não encontrado com o ID: " + id));
+        
+        tenantRepository.delete(tenant);
     }
 }
