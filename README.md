@@ -14,33 +14,41 @@ Você só precisa ter instalado em sua máquina:
 
 ## Como Rodar o Projeto
 
-**1. Clone o repositório:**
+1. **Clone o repositório:**
    ```bash
    git clone [https://github.com/Otavio-Ferreira/Sistema-Site-CMS.git](https://github.com/Otavio-Ferreira/Sistema-Site-CMS.git)
    ```
-   
+
+2. **Acesse a pasta do projeto:**
    ```bash
-   cd seu-repositorio
+   cd Sistema-Site-CMS
    ```
 
-**2. Subir Contêineres**
+3. **Suba os contêineres:**
+   Execute o comando abaixo na raiz do projeto para baixar as imagens, compilar o código Java e iniciar os serviços:
+   ```bash
+   docker compose up --build
+   ```
+   *(Remova o `-d` se quiser ver os logs rodando direto no terminal, ou adicione `-d` para rodar em segundo plano).*
 
-Execute o comando abaixo na raiz do projeto. Ele vai baixar as imagens necessárias, compilar o código Java dentro do ambiente Docker e iniciar os serviços.
+---
 
-    ```bash
-    docker compose up --build
-    ```
-
-**3. Portas e Acessos**
+## Portas e Acessos
 
 Assim que a inicialização for concluída, os serviços estarão disponíveis em:
 
-API (Spring Boot)
-    ```bash
-    http://localhost:8080
-    ```
+* **API (Spring Boot):** [http://localhost:8080](http://localhost:8080)
+* **Banco de Dados (MySQL Local):** `localhost:3306`
 
-Banco de Dados (MySQL)
-    ```bash
-    docker exec -it springboot_mysql mysql -u usuario -psenha meubanco
-    ```
+### Acesso Direto ao Banco via Terminal
+Se precisar entrar no terminal do MySQL direto pelo contêiner Docker, utilize o comando:
+```bash
+docker exec -it springboot_mysql mysql -u usuario -psenha meubanco
+```
+
+### Credenciais para Conexão Externa (DBeaver / Workbench)
+* **Host:** `localhost`
+* **Porta:** `3306`
+* **Database:** `meubanco`
+* **Usuário:** `usuario`
+* **Senha:** `senha`
