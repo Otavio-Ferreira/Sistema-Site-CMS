@@ -23,4 +23,16 @@ public class Assinatura {
 
     @Column(name = "status_pagamento", nullable = false)
     private String statusPagamento;
+
+    // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Tenant getTenant() { return tenant; }
+    public void setTenant(Tenant tenant) { this.tenant = tenant; }
+    public Plano getPlano() { return plano; }
+    public void setPlano(Plano plano) { this.plano = plano; }
+    public LocalDate getDataInicio() { return dataInicio; }
+    public void setDataInicio(LocalDate dataInicio) { this.dataInicio = dataInicio; }
+    public String getStatusPagamento() { return statusPagamento; }
+    public void setStatusPagamento(String statusPagamento) { this.statusPagamento = statusPagamento; }
 }

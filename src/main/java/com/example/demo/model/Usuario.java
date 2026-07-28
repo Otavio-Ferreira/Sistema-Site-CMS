@@ -23,7 +23,7 @@ public class Usuario {
     private boolean isAdmin;
 
     @ManyToOne
-    @JoinColumn(name = "tenant_id", nullable = false)
+    @JoinColumn(name = "tenant_id", nullable = true)
     private Tenant tenant;
 
     // Getters e Setters

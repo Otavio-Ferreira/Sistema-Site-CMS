@@ -36,4 +36,16 @@ public class Pagina {
 
     @OneToMany(mappedBy = "pagina", cascade = CascadeType.ALL)
     private List<BotaoCta> botoesCta;
+
+    // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Tenant getTenant() { return tenant; }
+    public void setTenant(Tenant tenant) { this.tenant = tenant; }
+    public String getUrlPublica() { return urlPublica; }
+    public void setUrlPublica(String urlPublica) { this.urlPublica = urlPublica; }
+    public String getTituloPagina() { return tituloPagina; }
+    public void setTituloPagina(String tituloPagina) { this.tituloPagina = tituloPagina; }
+    public LocalDate getDataCriacao() { return dataCriacao; }
+    public void setDataCriacao(LocalDate dataCriacao) { this.dataCriacao = dataCriacao; }
 }
