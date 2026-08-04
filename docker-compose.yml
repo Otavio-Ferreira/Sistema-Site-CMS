@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  web:
+    build: ./frontend
+    container_name: react_frontend
+    restart: always
+    ports:
+      - "5173:80"
+    networks:
+      - public_network
   # Banco de Dados MySQL
   db:
     image: mysql:8.0
@@ -12,7 +20,7 @@ services:
       MYSQL_PASSWORD: senha
       MYSQL_ROOT_PASSWORD: senharoot
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     # Garante que o contêiner avise quando o MySQL estiver realmente pronto
@@ -21,10 +29,12 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks:
+      - private_network
 
   # API Spring Boot
   api:
-    build: .
+    build: ./backend
     container_name: springboot_api
     restart: unless-stopped
     ports:
@@ -38,6 +48,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - public_network
+      - private_network
 
 volumes:
   mysql_data:
+
+networks:
+  public_network:
+    driver: bridge
+  private_network:
+    driver: bridge
