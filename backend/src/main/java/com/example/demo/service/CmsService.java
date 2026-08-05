@@ -3,8 +3,10 @@ package com.example.demo.service;
 import com.example.demo.dto.*;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -60,20 +62,20 @@ public class CmsService {
         pagina.setTenant(tenant);
         pagina.setUrlPublica(dto.urlPublica());
         pagina.setTituloPagina(dto.tituloPagina());
-        // Ajuste caso Pagina possua dataCriacao com setter ou por construtor/reflection
+        pagina.setDataCriacao(LocalDate.now());
         pagina = paginaRepository.save(pagina);
-        return new PaginaResponseDTO(pagina.getId(), tenant.getId(), pagina.getUrlPublica(), pagina.getTituloPagina(), LocalDate.now());
+        return new PaginaResponseDTO(pagina.getId(), tenant.getId(), pagina.getUrlPublica(), pagina.getTituloPagina(), pagina.getDataCriacao());
     }
 
     public List<PaginaResponseDTO> listarPaginasPorTenant(Long tenantId) {
         return paginaRepository.findByTenantId(tenantId).stream()
-                .map(p -> new PaginaResponseDTO(p.getId(), p.getTenant().getId(), p.getUrlPublica(), p.getTituloPagina(), LocalDate.now()))
+                .map(p -> new PaginaResponseDTO(p.getId(), p.getTenant().getId(), p.getUrlPublica(), p.getTituloPagina(), p.getDataCriacao()))
                 .collect(Collectors.toList());
     }
 
     public PaginaResponseDTO buscarPaginaPorId(Long id) {
         Pagina p = paginaRepository.findById(id).orElseThrow(() -> new RuntimeException("Página não encontrada"));
-        return new PaginaResponseDTO(p.getId(), p.getTenant().getId(), p.getUrlPublica(), p.getTituloPagina(), LocalDate.now());
+        return new PaginaResponseDTO(p.getId(), p.getTenant().getId(), p.getUrlPublica(), p.getTituloPagina(), p.getDataCriacao());
     }
 
     @Transactional
@@ -103,14 +105,15 @@ public class CmsService {
         Pagina pagina = paginaRepository.findById(dto.paginaId()).orElseThrow(() -> new RuntimeException("Página não encontrada"));
         Contato c = new Contato();
         c.setPagina(pagina);
-        // Assumindo setters correspondentes ou ajuste se necessário
+        c.setTipoContato(dto.tipoContato());
+        c.setValorContato(dto.valorContato());
         c = contatoRepository.save(c);
-        return new ContatoResponseDTO(c.getId(), pagina.getId(), dto.tipoContato(), dto.valorContato());
+        return new ContatoResponseDTO(c.getId(), pagina.getId(), c.getTipoContato(), c.getValorContato());
     }
 
     public List<ContatoResponseDTO> listarContatosPorPagina(Long paginaId) {
         return contatoRepository.findByPaginaId(paginaId).stream()
-                .map(c -> new ContatoResponseDTO(c.getId(), paginaId, "", ""))
+                .map(c -> new ContatoResponseDTO(c.getId(), paginaId, c.getTipoContato(), c.getValorContato()))
                 .collect(Collectors.toList());
     }
 
@@ -125,13 +128,15 @@ public class CmsService {
         Pagina pagina = paginaRepository.findById(dto.paginaId()).orElseThrow(() -> new RuntimeException("Página não encontrada"));
         Accordion a = new Accordion();
         a.setPagina(pagina);
+        a.setPerguntaTitulo(dto.perguntaTitulo());
+        a.setRespostaConteudo(dto.respostaConteudo());
         a = accordionRepository.save(a);
-        return new AccordionResponseDTO(a.getId(), pagina.getId(), dto.perguntaTitulo(), dto.respostaConteudo());
+        return new AccordionResponseDTO(a.getId(), pagina.getId(), a.getPerguntaTitulo(), a.getRespostaConteudo());
     }
 
     public List<AccordionResponseDTO> listarAccordionsPorPagina(Long paginaId) {
         return accordionRepository.findByPaginaId(paginaId).stream()
-                .map(a -> new AccordionResponseDTO(a.getId(), paginaId, "", ""))
+                .map(a -> new AccordionResponseDTO(a.getId(), paginaId, a.getPerguntaTitulo(), a.getRespostaConteudo()))
                 .collect(Collectors.toList());
     }
 
@@ -146,13 +151,15 @@ public class CmsService {
         Pagina pagina = paginaRepository.findById(dto.paginaId()).orElseThrow(() -> new RuntimeException("Página não encontrada"));
         BotaoCta b = new BotaoCta();
         b.setPagina(pagina);
+        b.setTextoExibicao(dto.textoExibicao());
+        b.setLinkDestino(dto.linkDestino());
         b = botaoCtaRepository.save(b);
-        return new BotaoCtaResponseDTO(b.getId(), pagina.getId(), dto.textoExibicao(), dto.linkDestino());
+        return new BotaoCtaResponseDTO(b.getId(), pagina.getId(), b.getTextoExibicao(), b.getLinkDestino());
     }
 
     public List<BotaoCtaResponseDTO> listarBotoesCtaPorPagina(Long paginaId) {
         return botaoCtaRepository.findByPaginaId(paginaId).stream()
-                .map(b -> new BotaoCtaResponseDTO(b.getId(), paginaId, "", ""))
+                .map(b -> new BotaoCtaResponseDTO(b.getId(), paginaId, b.getTextoExibicao(), b.getLinkDestino()))
                 .collect(Collectors.toList());
     }
 
@@ -245,7 +252,20 @@ public class CmsService {
 
     public List<CarrosselResponseDTO> listarCarrosseisPorPagina(Long paginaId) {
         return carrosselRepository.findByPaginaId(paginaId).stream()
-                .map(c -> new CarrosselResponseDTO(c.getId(), paginaId, List.of()))
+                .map(c -> {
+                    List<ImagemCarrosselResponseDTO> imagens = imagemCarrosselRepository.findByCarrosselId(c.getId()).stream()
+                            .sorted((a, b) -> Integer.compare(a.getOrdemExibicao(), b.getOrdemExibicao()))
+                            .map(img -> new ImagemCarrosselResponseDTO(
+                                    img.getId(),
+                                    c.getId(),
+                                    img.getOrdemExibicao(),
+                                    img.getUrlMidia(),
+                                    img.getTitulo(),
+                                    img.getDescricao(),
+                                    img.getLinkExterno()))
+                            .collect(Collectors.toList());
+                    return new CarrosselResponseDTO(c.getId(), paginaId, imagens);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -256,14 +276,15 @@ public class CmsService {
 
     @Transactional
     public ImagemCarrosselResponseDTO adicionarImagemCarrossel(ImagemCarrosselRequestDTO dto) {
-        Carrossel carrossel = carrosselRepository.findById(dto.carrosselId()).orElseThrow(() -> new RuntimeException("Carrossel não encontrado"));
+        Carrossel carrossel = carrosselRepository.findById(dto.carrosselId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Carrossel não encontrado"));
         ImagemCarrossel img = new ImagemCarrossel();
         img.setCarrossel(carrossel);
         img.setOrdemExibicao(dto.ordemExibicao());
-        img.setUrlMidia(dto.urlMidia());
-        img.setTitulo(dto.titulo());
-        img.setDescricao(dto.descricao());
-        img.setLinkExterno(dto.linkExterno());
+        img.setUrlMidia(dto.urlMidia() != null ? dto.urlMidia() : "");
+        img.setTitulo(dto.titulo() != null ? dto.titulo() : "");
+        img.setDescricao(dto.descricao() != null ? dto.descricao() : "");
+        img.setLinkExterno(dto.linkExterno() != null ? dto.linkExterno() : "");
         img = imagemCarrosselRepository.save(img);
         return new ImagemCarrosselResponseDTO(img.getId(), carrossel.getId(), img.getOrdemExibicao(), img.getUrlMidia(), img.getTitulo(), img.getDescricao(), img.getLinkExterno());
     }
@@ -277,14 +298,16 @@ public class CmsService {
     @Transactional
     public PlanoResponseDTO criarPlano(PlanoRequestDTO dto) {
         Plano p = new Plano();
-        // preencher plano via setter ou reflexão se necessário
+        p.setNomePlano(dto.nomePlano());
+        p.setValorMensal(dto.valorMensal());
+        p.setDescricao(dto.descricao());
         p = planoRepository.save(p);
-        return new PlanoResponseDTO(p.getId(), dto.nomePlano(), dto.valorMensal(), dto.descricao());
+        return new PlanoResponseDTO(p.getId(), p.getNomePlano(), p.getValorMensal(), p.getDescricao());
     }
 
     public List<PlanoResponseDTO> listarPlanos() {
         return planoRepository.findAll().stream()
-                .map(p -> new PlanoResponseDTO(p.getId(), "Plano", java.math.BigDecimal.ZERO, ""))
+                .map(p -> new PlanoResponseDTO(p.getId(), p.getNomePlano(), p.getValorMensal(), p.getDescricao()))
                 .collect(Collectors.toList());
     }
 
@@ -294,13 +317,17 @@ public class CmsService {
         Tenant tenant = tenantRepository.findById(dto.tenantId()).orElseThrow(() -> new RuntimeException("Tenant não encontrado"));
         Plano plano = planoRepository.findById(dto.planoId()).orElseThrow(() -> new RuntimeException("Plano não encontrado"));
         Assinatura a = new Assinatura();
+        a.setTenant(tenant);
+        a.setPlano(plano);
+        a.setDataInicio(dto.dataInicio());
+        a.setStatusPagamento(dto.statusPagamento());
         a = assinaturaRepository.save(a);
-        return new AssinaturaResponseDTO(a.getId(), tenant.getId(), tenant.getNome(), plano.getId(), "Plano", dto.dataInicio(), dto.statusPagamento());
+        return new AssinaturaResponseDTO(a.getId(), tenant.getId(), tenant.getNome(), plano.getId(), plano.getNomePlano(), a.getDataInicio(), a.getStatusPagamento());
     }
 
     public List<AssinaturaResponseDTO> listarAssinaturasPorTenant(Long tenantId) {
         return assinaturaRepository.findByTenantId(tenantId).stream()
-                .map(a -> new AssinaturaResponseDTO(a.getId(), tenantId, "", 1L, "", LocalDate.now(), ""))
+                .map(a -> new AssinaturaResponseDTO(a.getId(), a.getTenant().getId(), a.getTenant().getNome(), a.getPlano().getId(), a.getPlano().getNomePlano(), a.getDataInicio(), a.getStatusPagamento()))
                 .collect(Collectors.toList());
     }
 

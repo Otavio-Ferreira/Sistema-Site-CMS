@@ -19,4 +19,8 @@ public class Accordion {
     public void setId(Long id) { this.id = id; }
     public Pagina getPagina() { return pagina; }
     public void setPagina(Pagina pagina) { this.pagina = pagina; }
+    public String getPerguntaTitulo() { return perguntaTitulo; }
+    public void setPerguntaTitulo(String perguntaTitulo) { this.perguntaTitulo = perguntaTitulo; }
+    public String getRespostaConteudo() { return respostaConteudo; }
+    public void setRespostaConteudo(String respostaConteudo) { this.respostaConteudo = respostaConteudo; }
 }

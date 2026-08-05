@@ -24,6 +24,13 @@ public class Pagina {
     @Column(name = "data_criacao", nullable = false)
     private LocalDate dataCriacao;
 
+    @PrePersist
+    void definirDataCriacaoSeAusente() {
+        if (dataCriacao == null) {
+            dataCriacao = LocalDate.now();
+        }
+    }
+
     // Relacionamentos com os componentes do CMS
     @OneToOne(mappedBy = "pagina", cascade = CascadeType.ALL)
     private Biografia biografia;
