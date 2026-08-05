@@ -19,4 +19,8 @@ public class Contato {
     public void setId(Long id) { this.id = id; }
     public Pagina getPagina() { return pagina; }
     public void setPagina(Pagina pagina) { this.pagina = pagina; }
+    public String getTipoContato() { return tipoContato; }
+    public void setTipoContato(String tipoContato) { this.tipoContato = tipoContato; }
+    public String getValorContato() { return valorContato; }
+    public void setValorContato(String valorContato) { this.valorContato = valorContato; }
 }

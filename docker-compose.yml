@@ -12,7 +12,7 @@ services:
       MYSQL_PASSWORD: senha
       MYSQL_ROOT_PASSWORD: senharoot
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     # Garante que o contêiner avise quando o MySQL estiver realmente pronto
@@ -41,3 +41,4 @@ services:
 
 volumes:
   mysql_data:
+

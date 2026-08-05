@@ -9,6 +9,7 @@ import com.example.demo.repository.TenantRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -34,18 +35,24 @@ public class PaginaService {
         pagina.setTituloPagina(dto.tituloPagina());
         pagina.setUrlPublica(dto.urlPublica());
         pagina.setTenant(tenant);
+        pagina.setDataCriacao(LocalDate.now());
 
         pagina = paginaRepository.save(pagina);
-        return new PaginaResponseDTO(pagina.getId(), null, pagina.getTituloPagina(), pagina.getUrlPublica(), null);
+        return new PaginaResponseDTO(
+            pagina.getId(),
+            tenant.getId(),
+            pagina.getUrlPublica(),
+            pagina.getTituloPagina(),
+            pagina.getDataCriacao());
     }
 
     public List<PaginaResponseDTO> listarPorTenant(Long tenantId) {
         return paginaRepository.findByTenantId(tenantId).stream().map(p -> new PaginaResponseDTO(
-            p.getId(), 
-            tenantId, 
-            p.getTituloPagina(), 
+            p.getId(),
+            p.getTenant().getId(),
             p.getUrlPublica(),
-            null)).toList();
+            p.getTituloPagina(),
+            p.getDataCriacao())).toList();
     }
 
     @Transactional

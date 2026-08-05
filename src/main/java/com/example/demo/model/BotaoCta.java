@@ -19,4 +19,8 @@ public class BotaoCta {
     public void setId(Long id) { this.id = id; }
     public Pagina getPagina() { return pagina; }
     public void setPagina(Pagina pagina) { this.pagina = pagina; }
+    public String getTextoExibicao() { return textoExibicao; }
+    public void setTextoExibicao(String textoExibicao) { this.textoExibicao = textoExibicao; }
+    public String getLinkDestino() { return linkDestino; }
+    public void setLinkDestino(String linkDestino) { this.linkDestino = linkDestino; }
 }
