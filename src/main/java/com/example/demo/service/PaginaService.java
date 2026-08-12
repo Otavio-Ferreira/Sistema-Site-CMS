@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PaginaService {
@@ -25,45 +26,30 @@ public class PaginaService {
 
     @Transactional
     public PaginaResponseDTO criarPagina(PaginaRequestDTO dto) {
-        Tenant tenant = tenantRepository.findById(dto.tenantId()).orElseThrow(() -> new RuntimeException("Cliente (Tenant) não encontrado."));
-
-        if (paginaRepository.findByUrlPublica(dto.urlPublica()).isPresent()) {
-            throw new RuntimeException("Esta URL já está em uso. Por favor, escolhe outra.");
-        }
-
+        Tenant tenant = tenantRepository.findById(dto.tenantId())
+                .orElseThrow(() -> new RuntimeException("Tenant não encontrado"));
         Pagina pagina = new Pagina();
-        pagina.setTituloPagina(dto.tituloPagina());
-        pagina.setUrlPublica(dto.urlPublica());
         pagina.setTenant(tenant);
+        pagina.setUrlPublica(dto.urlPublica());
+        pagina.setTituloPagina(dto.tituloPagina());
         pagina.setDataCriacao(LocalDate.now());
-
         pagina = paginaRepository.save(pagina);
-        return new PaginaResponseDTO(
-            pagina.getId(),
-            tenant.getId(),
-            pagina.getUrlPublica(),
-            pagina.getTituloPagina(),
-            pagina.getDataCriacao());
+        return new PaginaResponseDTO(pagina.getId(), tenant.getId(), pagina.getUrlPublica(), pagina.getTituloPagina(), pagina.getDataCriacao());
     }
 
-    public List<PaginaResponseDTO> listarPorTenant(Long tenantId) {
-        return paginaRepository.findByTenantId(tenantId).stream().map(p -> new PaginaResponseDTO(
-            p.getId(),
-            p.getTenant().getId(),
-            p.getUrlPublica(),
-            p.getTituloPagina(),
-            p.getDataCriacao())).toList();
+    public List<PaginaResponseDTO> listarPaginasPorTenant(Long tenantId) {
+        return paginaRepository.findByTenantId(tenantId).stream()
+                .map(p -> new PaginaResponseDTO(p.getId(), p.getTenant().getId(), p.getUrlPublica(), p.getTituloPagina(), p.getDataCriacao()))
+                .collect(Collectors.toList());
+    }
+
+    public PaginaResponseDTO buscarPaginaPorId(Long id) {
+        Pagina p = paginaRepository.findById(id).orElseThrow(() -> new RuntimeException("Página não encontrada"));
+        return new PaginaResponseDTO(p.getId(), p.getTenant().getId(), p.getUrlPublica(), p.getTituloPagina(), p.getDataCriacao());
     }
 
     @Transactional
-    public void eliminarPagina(Long id, Long tenantId) {
-        // Verificar que um cliente não consiga apagar a página de outro
-        Pagina pagina = paginaRepository.findById(id).orElseThrow(() -> new RuntimeException("Página não encontrada."));
-        
-        if (!pagina.getTenant().getId().equals(tenantId)) {
-            throw new RuntimeException("Você não possui permissão para excluir essa página.");
-        }
-        
-        paginaRepository.delete(pagina);
+    public void deletarPagina(Long id) {
+        paginaRepository.deleteById(id);
     }
 }
