@@ -35,6 +35,17 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/login/", "/api/usuarios", "/api/usuarios/").permitAll()
                 .requestMatchers("/api/public/**").permitAll() 
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/").permitAll()
+                .requestMatchers(HttpMethod.GET,
+                     "/api/paginas/{id}",
+                    "/api/tenants/{id}",
+                    "/api/biografias/pagina/{paginaId}",
+                    "/api/contatos/pagina/{paginaId}",
+                    "/api/botoes-cta/pagina/{paginaId}",
+                    "/api/cards-cta/pagina/{paginaId}",
+                    "/api/carrosseis/pagina/{paginaId}",
+                    "/api/feedbacks/pagina/{paginaId}",
+                    "/api/accordions/pagina/{paginaId}"
+                ).permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
