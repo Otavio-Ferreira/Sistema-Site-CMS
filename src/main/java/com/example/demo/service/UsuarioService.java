@@ -6,6 +6,7 @@ import com.example.demo.model.Tenant;
 import com.example.demo.model.Usuario;
 import com.example.demo.repository.TenantRepository;
 import com.example.demo.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,12 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final TenantRepository tenantRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, TenantRepository tenantRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, TenantRepository tenantRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.tenantRepository = tenantRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -29,7 +32,7 @@ public class UsuarioService {
         Usuario u = new Usuario();
         u.setNomeCompleto(dto.nomeCompleto());
         u.setEmail(dto.email());
-        u.setSenhaHash(dto.senha());
+        u.setSenhaHash(passwordEncoder.encode(dto.senha()));
         u.setAdmin(dto.isAdmin());
         u.setTenant(tenant);
         u = usuarioRepository.save(u);

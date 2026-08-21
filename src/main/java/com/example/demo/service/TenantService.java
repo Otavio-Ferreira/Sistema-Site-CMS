@@ -47,7 +47,7 @@ public class TenantService {
         Usuario usuario = new Usuario();
         usuario.setNomeCompleto(dto.nome());
         usuario.setEmail(dto.email());
-        usuario.setSenhaHash(dto.senha()); // Sem criptografia por enquanto
+        usuario.setSenhaHash(passwordEncoder.encode(dto.senha()));
         usuario.setAdmin(false);
         usuario.setTenant(tenant);
         usuarioRepository.save(usuario);
