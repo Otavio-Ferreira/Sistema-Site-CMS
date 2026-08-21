@@ -6,16 +6,19 @@ import com.example.demo.repository.TenantRepository;
 import com.example.demo.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class DataSeeder implements CommandLineRunner {
 
     private final TenantRepository tenantRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataSeeder(TenantRepository tenantRepository, UsuarioRepository usuarioRepository) {
+    public DataSeeder(TenantRepository tenantRepository, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.tenantRepository = tenantRepository;
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class DataSeeder implements CommandLineRunner {
             Usuario admin = new Usuario();
             admin.setNomeCompleto("Administrador do Sistema");
             admin.setEmail("admin@admin.com");
-            admin.setSenhaHash("123456"); // Senha crua por enquanto
+            admin.setSenhaHash(passwordEncoder.encode("123456"));
             admin.setAdmin(true);
             admin.setTenant(tenantPadrao);
             
