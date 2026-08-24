@@ -35,7 +35,8 @@ public class AuthService {
                 usuario.getNomeCompleto(),
                 usuario.getEmail(),
                 token,
-                usuario.getTenant() != null ? usuario.getTenant().getId() : null
+                usuario.getTenant() != null ? usuario.getTenant().getId() : null,
+                usuario.isAdmin()
         );
     }
 }
